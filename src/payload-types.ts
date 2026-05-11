@@ -69,6 +69,10 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    properties: Property;
+    rooms: Room;
+    leases: Lease;
+    invoices: Invoice;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -78,6 +82,10 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    properties: PropertiesSelect<false> | PropertiesSelect<true>;
+    rooms: RoomsSelect<false> | RoomsSelect<true>;
+    leases: LeasesSelect<false> | LeasesSelect<true>;
+    invoices: InvoicesSelect<false> | InvoicesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -123,6 +131,9 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  name: string;
+  role: 'admin' | 'tenant';
+  phoneNumber: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -163,6 +174,70 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "properties".
+ */
+export interface Property {
+  id: string;
+  name: string;
+  address?: string | null;
+  image?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rooms".
+ */
+export interface Room {
+  id: string;
+  roomNumber: string;
+  price: number;
+  status?: ('available' | 'occupied') | null;
+  parentProperty?: (string | null) | Property;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leases".
+ */
+export interface Lease {
+  id: string;
+  tenant: string | User;
+  room: string | Room;
+  startDate: string;
+  dueDate: number;
+  isActive?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices".
+ */
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  lease: string | Lease;
+  tenant: string | User;
+  room: string | Room;
+  /**
+   * Format YYYY-MM, dipakai untuk mencegah invoice duplikat per bulan.
+   */
+  billingMonth: string;
+  amount: number;
+  dueOn: string;
+  status: 'pending' | 'paid' | 'overdue' | 'void';
+  paymentProvider?: 'xendit' | null;
+  xenditInvoiceId?: string | null;
+  paymentUrl?: string | null;
+  paidAt?: string | null;
+  notes?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -192,6 +267,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'properties';
+        value: string | Property;
+      } | null)
+    | ({
+        relationTo: 'rooms';
+        value: string | Room;
+      } | null)
+    | ({
+        relationTo: 'leases';
+        value: string | Lease;
+      } | null)
+    | ({
+        relationTo: 'invoices';
+        value: string | Invoice;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -240,6 +331,9 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  phoneNumber?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -274,6 +368,63 @@ export interface MediaSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "properties_select".
+ */
+export interface PropertiesSelect<T extends boolean = true> {
+  name?: T;
+  address?: T;
+  image?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rooms_select".
+ */
+export interface RoomsSelect<T extends boolean = true> {
+  roomNumber?: T;
+  price?: T;
+  status?: T;
+  parentProperty?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "leases_select".
+ */
+export interface LeasesSelect<T extends boolean = true> {
+  tenant?: T;
+  room?: T;
+  startDate?: T;
+  dueDate?: T;
+  isActive?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invoices_select".
+ */
+export interface InvoicesSelect<T extends boolean = true> {
+  invoiceNumber?: T;
+  lease?: T;
+  tenant?: T;
+  room?: T;
+  billingMonth?: T;
+  amount?: T;
+  dueOn?: T;
+  status?: T;
+  paymentProvider?: T;
+  xenditInvoiceId?: T;
+  paymentUrl?: T;
+  paidAt?: T;
+  notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
