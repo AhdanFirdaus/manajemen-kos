@@ -3,7 +3,7 @@ import { headers as getHeaders } from 'next/headers'
 
 import { Card } from '@/components/ui/card'
 import { getPayloadClient } from '@/lib/payload'
-import { ReportForm } from '../report-form'
+import { ReportForm } from '../_components/report-form'
 
 export default async function NewReportPage() {
   const payload = await getPayloadClient()
