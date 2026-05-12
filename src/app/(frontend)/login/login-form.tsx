@@ -40,12 +40,28 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
       const payload = (await response.json().catch(() => null)) as {
         message?: string
         errors?: Array<{ message?: string }>
+        user?: { role?: string }
       } | null
 
       if (!response.ok) {
         const details =
           payload?.errors?.[0]?.message || payload?.message || 'Email atau password tidak valid.'
         setErrorMessage(details)
+        return
+      }
+
+      // Prevent admin accounts from using the tenant login form.
+      if (payload?.user?.role === 'admin') {
+        try {
+          // clear session created by the login attempt
+          await fetch('/api/users/logout', { method: 'POST', credentials: 'include' })
+        } catch (e) {
+          // ignore logout errors
+        }
+
+        setErrorMessage(
+          'Akun admin tidak boleh masuk melalui halaman penghuni. Silakan gunakan panel admin.',
+        )
         return
       }
 
@@ -62,10 +78,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
     <form className="space-y-8" onSubmit={handleSubmit}>
       {/* Email Field */}
       <div className="space-y-2">
-        <label 
-          htmlFor="email" 
-          className="block text-sm font-medium text-foreground/90"
-        >
+        <label htmlFor="email" className="block text-sm font-medium text-foreground/90">
           Email
         </label>
         <Input
@@ -85,10 +98,7 @@ export function LoginForm({ nextPath }: { nextPath: string }) {
 
       {/* Password Field */}
       <div className="space-y-2">
-        <label 
-          htmlFor="password" 
-          className="block text-sm font-medium text-foreground/90"
-        >
+        <label htmlFor="password" className="block text-sm font-medium text-foreground/90">
           Password
         </label>
         <Input

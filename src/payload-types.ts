@@ -73,6 +73,7 @@ export interface Config {
     rooms: Room;
     leases: Lease;
     invoices: Invoice;
+    'maintenance-reports': MaintenanceReport;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +87,7 @@ export interface Config {
     rooms: RoomsSelect<false> | RoomsSelect<true>;
     leases: LeasesSelect<false> | LeasesSelect<true>;
     invoices: InvoicesSelect<false> | InvoicesSelect<true>;
+    'maintenance-reports': MaintenanceReportsSelect<false> | MaintenanceReportsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -238,6 +240,28 @@ export interface Invoice {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "maintenance-reports".
+ */
+export interface MaintenanceReport {
+  id: string;
+  tenant: string | User;
+  title: string;
+  description: string;
+  location: string;
+  images?:
+    | {
+        image: string | Media;
+        id?: string | null;
+      }[]
+    | null;
+  status?: ('reported' | 'in-progress' | 'resolved') | null;
+  adminNotes?: string | null;
+  resolvedAt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -283,6 +307,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'invoices';
         value: string | Invoice;
+      } | null)
+    | ({
+        relationTo: 'maintenance-reports';
+        value: string | MaintenanceReport;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -423,6 +451,27 @@ export interface InvoicesSelect<T extends boolean = true> {
   paymentUrl?: T;
   paidAt?: T;
   notes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "maintenance-reports_select".
+ */
+export interface MaintenanceReportsSelect<T extends boolean = true> {
+  tenant?: T;
+  title?: T;
+  description?: T;
+  location?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        id?: T;
+      };
+  status?: T;
+  adminNotes?: T;
+  resolvedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

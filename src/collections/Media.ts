@@ -9,9 +9,19 @@ export const Media: CollectionConfig = {
   access: {
     read: () => true,
     admin: isAdmin,
-    create: isAdmin,
+    create: ({ req: { user } }) => Boolean(user),
     update: isAdmin,
     delete: isAdmin,
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data, file }) => {
+        return {
+          ...data,
+          alt: data?.alt || file?.filename || file?.name || 'Media',
+        }
+      },
+    ],
   },
   fields: [
     {

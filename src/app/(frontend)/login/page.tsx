@@ -42,7 +42,7 @@ export default async function LoginPage({ searchParams }: { searchParams?: { nex
                 variant="secondary"
                 className="rounded-full px-4 py-1.5 text-sm uppercase tracking-[0.2em]"
               >
-                Tenant Access
+                Penghuni Akses
               </Badge>
             </div>
 
@@ -52,7 +52,7 @@ export default async function LoginPage({ searchParams }: { searchParams?: { nex
               </h1>
 
               <p className="max-w-md mx-auto lg:mx-0 text-base sm:text-lg text-muted-foreground">
-                Masuk ke dashboard tenant untuk mengelola kamar, pembayaran, dan informasi penghuni.
+                Masuk ke dashboard penghuni untuk mengelola kamar, pembayaran, dan informasi penghuni.
               </p>
             </div>
 

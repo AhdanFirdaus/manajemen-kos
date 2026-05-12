@@ -7,6 +7,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { getPayloadClient } from '@/lib/payload'
 
+interface SearchParams {
+  page?: string
+}
+
+const ITEMS_PER_PAGE = 4
+
 function formatCurrency(value: number) {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -35,7 +41,7 @@ function formatDate(value?: string | Date | null) {
   }).format(new Date(value))
 }
 
-export default async function TenantDashboard() {
+export default async function TenantDashboard({ searchParams }: { searchParams?: SearchParams }) {
   const payload = await getPayloadClient()
   const headers = await getHeaders()
   const { user } = await payload.auth({ headers })
@@ -47,6 +53,8 @@ export default async function TenantDashboard() {
   if (user.role === 'admin') {
     redirect('/admin')
   }
+
+  const currentPage = Math.max(1, parseInt(searchParams?.page ?? '1', 10))
 
   const [{ docs: leases }, { docs: invoices }] = await Promise.all([
     payload.find({
@@ -63,10 +71,16 @@ export default async function TenantDashboard() {
         tenant: { equals: user.id },
       },
       sort: '-createdAt',
-      limit: 6,
+      limit: 100,
       depth: 1,
     }),
   ])
+
+  const totalPages = Math.ceil(invoices.length / ITEMS_PER_PAGE)
+  const paginatedInvoices = invoices.slice(
+    (currentPage - 1) * ITEMS_PER_PAGE,
+    currentPage * ITEMS_PER_PAGE,
+  )
 
   const currentLease = leases[0]
   const activeInvoices = invoices.filter((invoice) => invoice.status !== 'paid')
@@ -160,7 +174,7 @@ export default async function TenantDashboard() {
               <p className="text-sm text-muted-foreground">Belum ada tagihan yang dibuat.</p>
             ) : (
               <div className="space-y-4">
-                {invoices.map((invoice) => {
+                {paginatedInvoices.map((invoice) => {
                   const status = invoice.status || 'pending'
                   const amount = typeof invoice.amount === 'number' ? invoice.amount : 0
 
@@ -197,29 +211,41 @@ export default async function TenantDashboard() {
                 })}
               </div>
             )}
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-between gap-2">
+                <div className="text-xs text-muted-foreground">
+                  Halaman {currentPage} dari {totalPages} · {invoices.length} total
+                </div>
+                <div className="flex gap-2">
+                  {currentPage > 1 && (
+                    <Button asChild variant="outline" size="sm" className="rounded-full">
+                      <Link href={`/dashboard?page=${currentPage - 1}`}>← Sebelumnya</Link>
+                    </Button>
+                  )}
+                  {currentPage < totalPages && (
+                    <Button asChild variant="outline" size="sm" className="rounded-full">
+                      <Link href={`/dashboard?page=${currentPage + 1}`}>Berikutnya →</Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         <Card className="border-border/60 bg-card/80 shadow-sm backdrop-blur">
           <CardHeader>
-            <CardTitle>Ringkasan cepat</CardTitle>
-            <CardDescription>Aksi yang sering dibutuhkan tenant.</CardDescription>
+            <CardTitle>Aksi cepat</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button asChild className="w-full rounded-full">
-              <Link href="/billing">Buka halaman billing</Link>
+              <Link href="/billing">Lihat semua tagihan</Link>
             </Button>
-            <div className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-muted-foreground">
-              <p className="font-medium text-foreground">Status koneksi</p>
-              <p className="mt-1">
-                Dashboard ini membaca data langsung dari Payload Local API, jadi data yang tampil
-                selalu mengikuti database aktif.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-border/60 bg-background/70 p-4 text-sm text-muted-foreground">
-              <p className="font-medium text-foreground">Akun saat ini</p>
-              <p className="mt-1">Tenant ID: {user.id}</p>
-            </div>
+            <Button asChild variant="outline" className="w-full rounded-full">
+              <Link href="/reports">Laporan pemeliharaan</Link>
+            </Button>
           </CardContent>
         </Card>
       </section>

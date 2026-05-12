@@ -13,6 +13,7 @@ import { Properties } from './collections/Properties'
 import { Rooms } from './collections/Rooms'
 import { Leases } from './collections/Leases'
 import { Invoices } from './collections/Invoices'
+import { MaintenanceReports } from './collections/MaintenanceReports'
 import { createXenditInvoiceEndpoint } from './endpoints/xendit/createInvoice'
 import { xenditWebhookEndpoint } from './endpoints/xendit/webhook'
 
@@ -27,7 +28,7 @@ export default buildConfig({
     },
   },
   endpoints: [createXenditInvoiceEndpoint, xenditWebhookEndpoint],
-  collections: [Users, Media, Properties, Rooms, Leases, Invoices],
+  collections: [Users, Media, Properties, Rooms, Leases, Invoices, MaintenanceReports],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
